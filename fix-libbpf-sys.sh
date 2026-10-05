@@ -6,12 +6,13 @@
 
 CARGO_HOME="$1"
 PKG_BUILD_DIR="$2"
-LIBBPF_SYS_PKG="libbpf-sys-1.5.1+v1.5.1"
+LIBBPF_SYS_GLOB="libbpf-sys-*"
 found=0
 
 # CARGO_HOME 可能同时存在 crates.io、rsproxy、USTC 等多个 registry。
 # 必须全部修补，不能只取 head -1 的第一个目录。
-for build_rs in "${CARGO_HOME}"/registry/src/*/"${LIBBPF_SYS_PKG}"/build.rs; do
+# libbpf-sys 版本随上游升级而变化（1.5.1 -> 1.7.0），使用通配符匹配。
+for build_rs in "${CARGO_HOME}"/registry/src/*/${LIBBPF_SYS_GLOB}/build.rs; do
     [ -f "${build_rs}" ] || continue
     found=1
 
@@ -31,7 +32,7 @@ for build_rs in "${CARGO_HOME}"/registry/src/*/"${LIBBPF_SYS_PKG}"/build.rs; do
 done
 
 if [ "${found}" -eq 0 ]; then
-    echo "fix-libbpf-sys.sh: ${LIBBPF_SYS_PKG} not found in cargo registry, skipping"
+    echo "fix-libbpf-sys.sh: no libbpf-sys found in cargo registry, skipping"
     exit 0
 fi
 
